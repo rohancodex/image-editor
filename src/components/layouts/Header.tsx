@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,11 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { Moon, Sun } from "lucide-react";
 import { ICreateUser } from "@/app/signup/helper";
+import { ThemeToggle } from "../ui/ThemeToggle";
 
 const Header = () => {
-  const { setTheme, theme } = useTheme();
   const router = useRouter();
   const [user, setUser] = useState<ICreateUser | null>(null);
 
@@ -39,23 +37,7 @@ const Header = () => {
           Image Editor
         </h1>
         <div className="flex items-center gap-5 md:gap-10">
-          <Button
-            className="w-12 h-12 rounded-full"
-            onClick={() => {
-              theme === "light" ? setTheme("dark") : setTheme("light");
-            }}
-            variant={"outline"}
-          >
-            {theme === "light" ? (
-              <span>
-                <Sun className="w-5 h-5" />
-              </span>
-            ) : (
-              <span>
-                <Moon className="w-5 h-5" />
-              </span>
-            )}
-          </Button>
+          <ThemeToggle />
           {user?.email ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
