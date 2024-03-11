@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { removeCookie } from "typescript-cookie";
 import { useRouter } from "next/navigation";
 import { Moon, Sun } from "lucide-react";
 import { ICreateUser } from "@/app/signup/helper";
