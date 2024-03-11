@@ -9,13 +9,15 @@ import Image from "next/image";
 import Link from "next/link";
 import CreateUserForm from "./SignupForm";
 import { ICreateUser } from "./helper";
-import { redirect } from "next/navigation";
 import { useLayoutEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const Signup = () => {
+  const router = useRouter();
+
   useLayoutEffect(() => {
     if (localStorage.getItem("image-editor-login")) {
-      redirect("/");
+      router.replace("/");
     }
   }, []);
 
@@ -25,7 +27,7 @@ const Signup = () => {
     localStorage.setItem("image-editor-login", "true");
 
     // redirect
-    redirect("/");
+    router.replace("/");
   };
   return (
     <section className="flex justify-center lg:container lg:items-center lg:h-screen">
