@@ -66,7 +66,7 @@ const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center h-screen gap-8">
+    <div className="flex flex-col items-center lg:h-screen gap-8">
       <div className="flex gap-4 items-center">
         <Input
           name="text"
