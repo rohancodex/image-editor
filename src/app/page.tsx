@@ -20,7 +20,7 @@ export default function Home() {
   };
 
   return (
-    <main className=" min-h-screen p-24">
+    <main className=" min-h-screen p-8 lg:p-24">
       <section className="flex flex-col items-center gap-16">
         <ImageUpload onImageUpload={handleImageUpload} />
         {image ? <ImageEditor imageUrl={image} /> : null}
