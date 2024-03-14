@@ -1,31 +1,85 @@
-"use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, ElementRef } from "react";
 import ColorPicker from "../ui/ColorPicker";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { motion } from "framer-motion";
+import { PanInfo, motion } from "framer-motion";
 
 interface ImageEditorProps {
   imageUrl: string;
+}
+interface HistoryState {
+  text: string;
+  fontSize: number;
+  textColor: string;
+  position: { x: number; y: number };
 }
 
 const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
   const [text, setText] = useState("");
   const [fontSize, setFontSize] = useState(24);
   const [textColor, setTextColor] = useState("#0d0d0d");
-  const imageRef = useRef<HTMLImageElement | null>(null);
-  const textRef = useRef<HTMLDivElement | null>(null);
+
+  const imageRef = useRef<ElementRef<"img">>(null);
+  const textRef = useRef<ElementRef<"div">>(null);
+
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
+  const [history, setHistory] = useState<HistoryState[]>([
+    { text, fontSize, textColor, position },
+  ]);
+
+  const updateStateWithHistory = (newState: HistoryState) => {
+    setText(newState.text);
+    setFontSize(newState.fontSize);
+    setTextColor(newState.textColor);
+    setPosition(newState.position);
+  };
+
+  const pushToHistory = (newState: HistoryState) => {
+    const newHistory = history.slice(0, currentHistoryIndex + 1);
+    newHistory.push(newState);
+    setHistory(newHistory);
+    setCurrentHistoryIndex(newHistory.length - 1);
+  };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
+    const newText = e.target.value;
+    setText(newText);
+    pushToHistory({ text: newText, fontSize, textColor, position });
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFontSize(parseInt(e.target.value, 10));
+    const newFontSize = parseInt(e.target.value, 10);
+    setFontSize(newFontSize);
+    pushToHistory({ text, fontSize: newFontSize, textColor, position });
   };
 
   const handleColorChange = (color: string) => {
     setTextColor(color);
+    pushToHistory({ text, fontSize, textColor: color, position });
+  };
+
+  const handleDragEnd = (event: Event, info: PanInfo) => {
+    const newPosition = {
+      x: position.x + info.offset.x,
+      y: position.y + info.offset.y,
+    };
+    setPosition(newPosition);
+    pushToHistory({ text, fontSize, textColor, position: newPosition });
+  };
+
+  const undo = () => {
+    if (currentHistoryIndex > 0) {
+      setCurrentHistoryIndex(currentHistoryIndex - 1);
+      updateStateWithHistory(history[currentHistoryIndex - 1]);
+    }
+  };
+
+  const redo = () => {
+    if (currentHistoryIndex < history.length - 1) {
+      setCurrentHistoryIndex(currentHistoryIndex + 1);
+      updateStateWithHistory(history[currentHistoryIndex + 1]);
+    }
   };
 
   const handleDownload = () => {
@@ -38,24 +92,18 @@ const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
     canvas.height = image.naturalHeight;
 
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    // Calculate scale based on width
     const scale = canvas.width / image.width;
 
     const rect = image.getBoundingClientRect();
     const textRect = textRef.current.getBoundingClientRect();
 
-    // Calculate the position of the text relative to the image's scaling
     let textX = (textRect.left - rect.left) * scale;
     let textY = (textRect.top - rect.top) * scale + fontSize * scale;
 
     ctx.fillStyle = textColor;
-
-    // Adjust font size based on scale
     ctx.font = `${fontSize * scale}px Arial`;
-
     ctx.fillText(text, textX, textY);
 
-    // Convert canvas to an image and trigger download
     const dataURL = canvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.download = "edited-image.png";
@@ -73,7 +121,7 @@ const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
           type="text"
           value={text}
           onChange={handleTextChange}
-          placeholder="Editor Image"
+          placeholder="Enter Text"
         />
         <Input
           name="font-size"
@@ -84,6 +132,16 @@ const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
         />
         <ColorPicker color={textColor} onChange={handleColorChange} />
         <Button onClick={handleDownload}>Download</Button>
+        <Button onClick={() => setText("")}>Clear</Button>
+        <Button onClick={undo} disabled={currentHistoryIndex === 0}>
+          Undo
+        </Button>
+        <Button
+          onClick={redo}
+          disabled={currentHistoryIndex === history.length - 1}
+        >
+          Redo
+        </Button>
       </div>
       <motion.div className="relative h-full w-full flex justify-center items-center border-2">
         <img
@@ -95,12 +153,15 @@ const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
         <motion.div
           drag
           dragConstraints={imageRef}
+          onDragEnd={handleDragEnd}
           className="inline-block absolute hover:cursor-pointer active:cursor-grab"
           style={{
             fontSize: `${fontSize}px`,
             color: textColor,
             userSelect: "none",
           }}
+          animate={{ x: position.x, y: position.y }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
           ref={textRef}
         >
           {text}
