@@ -3,6 +3,7 @@ import ColorPicker from "../ui/ColorPicker";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { PanInfo, motion } from "framer-motion";
+import { Label } from "../ui/label";
 
 interface ImageEditorProps {
   imageUrl: string;
@@ -115,7 +116,7 @@ const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
 
   return (
     <div className="flex flex-col items-center lg:h-screen gap-8">
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4 w-full">
         <Input
           name="text"
           type="text"
@@ -123,24 +124,48 @@ const ImageEditor = ({ imageUrl }: ImageEditorProps) => {
           onChange={handleTextChange}
           placeholder="Enter Text"
         />
-        <Input
-          name="font-size"
-          type="number"
-          value={fontSize}
-          onChange={handleFontSizeChange}
-          placeholder="Font Size"
-        />
-        <ColorPicker color={textColor} onChange={handleColorChange} />
-        <Button onClick={handleDownload}>Download</Button>
-        <Button onClick={() => setText("")}>Clear</Button>
-        <Button onClick={undo} disabled={currentHistoryIndex === 0}>
-          Undo
+        <Button className="w-auto flex-1" onClick={() => setText("")}>
+          Clear
         </Button>
-        <Button
-          onClick={redo}
-          disabled={currentHistoryIndex === history.length - 1}
-        >
-          Redo
+      </div>
+      <div className="flex flex-col md:flex-row gap-4 w-full items-center">
+        <div className="flex md:flex-row gap-4 items-center w-full">
+          <div className="flex gap-2 items-center w-auto">
+            <p>Color:</p>
+            <ColorPicker color={textColor} onChange={handleColorChange} />
+          </div>
+          <div className="flex gap-2 items-center w-full">
+            <Label htmlFor="font-size">Font size:</Label>
+            <Input
+              id="font-size"
+              className="w-auto flex-grow md:flex-none"
+              name="font-size"
+              type="number"
+              value={fontSize}
+              onChange={handleFontSizeChange}
+              placeholder="Font Size"
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <Button
+            className="flex-1 "
+            onClick={undo}
+            disabled={currentHistoryIndex === 0}
+          >
+            Undo
+          </Button>
+          <Button
+            className="flex-1 "
+            onClick={redo}
+            disabled={currentHistoryIndex === history.length - 1}
+          >
+            Redo
+          </Button>
+        </div>
+
+        <Button className="w-full md:w-auto" onClick={handleDownload}>
+          Download
         </Button>
       </div>
       <motion.div className="relative h-full w-full flex justify-center items-center border-2">

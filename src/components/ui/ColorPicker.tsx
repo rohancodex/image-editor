@@ -1,14 +1,23 @@
-import React, { ElementRef, useCallback, useRef, useState } from "react";
+import React, {
+  CSSProperties,
+  ElementRef,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import { HexColorPicker } from "react-colorful";
 
 import useClickOutside from "@/hooks/useClickOutside";
+import { cn } from "@/lib/utils";
 
 const ColorPicker = ({
   color,
   onChange,
+  className,
 }: {
   color: string;
   onChange: (color: string) => void;
+  className?: string;
 }) => {
   const popover = useRef<ElementRef<"div">>(null);
   const [isOpen, toggle] = useState(false);
@@ -17,7 +26,7 @@ const ColorPicker = ({
   useClickOutside(popover, close);
 
   return (
-    <div className="picker">
+    <div className={cn("picker", className)}>
       <div
         className="swatch"
         style={{ backgroundColor: color }}
