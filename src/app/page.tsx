@@ -1,18 +1,9 @@
 "use client";
 import ImageEditor from "@/components/molecules/ImageEditor";
 import ImageUpload from "@/components/molecules/ImageUpload";
-import { useRouter } from "next/navigation";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Home() {
-  const router = useRouter();
-  useLayoutEffect(() => {
-    const isAuth = localStorage.getItem("image-editor-login");
-    if (!isAuth) {
-      router.replace("/login");
-    }
-  }, []);
-
   const [image, setImage] = useState<string | null>(null);
 
   const handleImageUpload = (uploadedImage: string | ArrayBuffer | null) => {

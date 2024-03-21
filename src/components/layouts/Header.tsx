@@ -1,5 +1,3 @@
-"use client";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,26 +8,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { ICreateUser } from "@/app/signup/helper";
 import { ThemeToggle } from "../ui/ThemeToggle";
+import {
+  LogoutLink,
+  getKindeServerSession,
+} from "@kinde-oss/kinde-auth-nextjs/server";
 
-const Header = () => {
-  const router = useRouter();
-  const [user, setUser] = useState<ICreateUser | null>(null);
+const Header = async () => {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
 
-  const handleLogout = async () => {
-    localStorage.removeItem("image-editor-user");
-    localStorage.removeItem("image-editor-login");
-    router.push("/login");
-  };
-
-  useEffect(() => {
-    // get cookie
-    const authUser = localStorage.getItem("image-editor-user");
-    if (authUser) {
-      setUser(JSON.parse(authUser));
-    }
-  }, []);
   return (
     <header>
       <nav className="container flex items-center justify-between py-4 md:py-8">
@@ -46,7 +34,7 @@ const Header = () => {
                   className="relative w-12 h-12 rounded-full"
                 >
                   <div className=" flex justify-center items-center">
-                    {user.full_name?.at(0)?.toUpperCase()}
+                    {user.given_name?.at(0)?.toUpperCase()}
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -54,7 +42,7 @@ const Header = () => {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user.full_name}
+                      {user.given_name + " " + user.family_name}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
@@ -63,8 +51,8 @@ const Header = () => {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={handleLogout}>
-                  Log out
+                <DropdownMenuItem>
+                  <LogoutLink>Log out</LogoutLink>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
